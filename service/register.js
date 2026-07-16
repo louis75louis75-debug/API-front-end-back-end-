@@ -1,5 +1,5 @@
 const API_URL = "http://localhost:5500";
-
+const dotenv = require('dotenv').config();
 /**
  * Envoie les données d'inscription au backend
  * @param {Object} userData - { name, email, password, confirmPassword }

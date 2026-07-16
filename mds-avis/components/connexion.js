@@ -31,19 +31,18 @@ export default function Connexion() {
         const result = await response.json();
         
         if (result.jwt) {
-  localStorage.setItem("token", result.jwt);
-}
+          localStorage.setItem("token", result.jwt);
+          localStorage.setItem("username", result.username); 
+        }
         
         router.push("/");
       } else {
-  
-  setErrorMessage("Mot de passe ou email incorrect.");
-  
-  // Disparition après 4 secondes
-  setTimeout(() => {
-    setErrorMessage("");
-  }, 4000);
-}
+        setErrorMessage("Mot de passe ou email incorrect.");
+        setTimeout(() => {
+          setErrorMessage("");
+        }, 4000);
+      }
+
     } catch (error) {
       console.error("Erreur réseau :", error);
       setErrorMessage("Une erreur est survenue lors de la connexion au serveur.");
@@ -51,7 +50,7 @@ export default function Connexion() {
         setErrorMessage("");
       }, 4000);
     }
-  };
+  }; // 👈 L'accolade fermante manquante était ici pour clore handleSubmit !
 
   return (
     <>

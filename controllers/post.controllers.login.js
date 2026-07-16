@@ -33,13 +33,17 @@ module.exports = async (req, res) => {
     }
 
     
-    const token = signJwt({ email: user.email })
+    const token = signJwt({ 
+  id: user.id,        // 👈 TRÈS IMPORTANT : On ajoute l'ID ici !
+  email: user.email 
+})
 
     
     return res.status(200).json({
       error: false,
       message: "Connexion réussie",
-      jwt: token
+      jwt: token ,
+      username: user.name
     })
   } catch (error) {
     

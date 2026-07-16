@@ -1,5 +1,5 @@
 const API_URL = "http://localhost:5500";
-
+const dotenv = require('dotenv').config();
 /**
  * Envoie les identifiants au backend pour connecter l'utilisateur
  * @param {Object} credentials - { email, password }

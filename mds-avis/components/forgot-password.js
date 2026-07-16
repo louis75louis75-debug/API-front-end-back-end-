@@ -1,19 +1,45 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 export default function PasswordForgot() {
-  const handleSubmit = (e) => {
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
+    setError("");
     
     // Récupération de l'adresse email
     const data = new FormData(e.currentTarget);
     const email = data.get('email');
 
-    console.log("Demande de réinitialisation pour :", email);
-    
-    // Simulation de l'envoi
-    alert("Si ce compte existe, un lien de réinitialisation vous a été envoyé par email.");
+    try {
+      // Connexion directe avec ton API backend
+      const response = await fetch("http://localhost:5500/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage(result.message);
+      } else {
+        setError(result.message || "Une erreur est survenue.");
+      }
+    } catch (err) {
+      setError("Impossible de joindre le serveur d'envoi.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,8 +53,9 @@ export default function PasswordForgot() {
         <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-white">
           Forgot password?
         </h2>
+        {/* Correction ESLint ici : we&apos;ll à la place de we'll */}
         <p className="mt-2 text-center text-sm text-gray-400">
-          Enter your email address and we'll send you a link to reset your password.
+          Enter your email address and we&apos;ll send you a link to reset your password.
         </p>
       </div>
 
@@ -52,18 +79,30 @@ export default function PasswordForgot() {
             </div>
           </div>
 
+          {/* Affichage des retours d'API */}
+          {message && (
+            <p className="text-sm text-green-400 text-center font-medium">
+              {message}
+            </p>
+          )}
+          {error && (
+            <p className="text-sm text-red-400 text-center font-medium">
+              {error}
+            </p>
+          )}
+
           <div>
             <button
               type="submit"
-              className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+              disabled={loading}
+              className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-50 transition-opacity"
             >
-              Send reset link
+              {loading ? "Sending..." : "Send reset link"}
             </button>
           </div>
         </form>
 
         <p className="mt-10 text-center text-sm/6 text-gray-400">
-          
           <Link href="/connexion" className="font-semibold text-indigo-400 hover:text-indigo-300">
             Back to sign in
           </Link>

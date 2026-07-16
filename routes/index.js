@@ -50,12 +50,15 @@ const postMiddlewareLogin = require('../middleware/post.middleware.login')      
 // --- Déclaration des routes ---
 // Lecture des données (GET)
 router.get('/', getMiddleware, getController)                 // accueil de l'API
-router.get('/avis', getMiddlewareReviews, getControllerAvis)  // tous les avis (protégé par JWT)
+router.get('/avis', getControllerAvis)                        // tous les avis 
 router.get('/avis/:id', getControllerAvisId)                  // un avis précis (:id = paramètre d'URL)
 
 // Création / modification / suppression d'un avis
-router.post('/add/avis', postController)                      // ajouter un avis
+
+router.post('/add/avis', getMiddlewareReviews, postController)
 router.put('/autoriser/avis/:id', putController)              // autoriser (publier) un avis
+router.put('/avis/:id', getMiddlewareReviews, putController)
+router.delete('/avis/:id', getMiddlewareReviews, deleteController)
 router.delete('/avis/:id', deleteController)                  // supprimer un avis
 
 // Authentification

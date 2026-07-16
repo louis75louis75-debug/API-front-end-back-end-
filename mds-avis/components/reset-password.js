@@ -1,22 +1,77 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function PasswordReset() {
-  const handleSubmit = (e) => {
+  const [token, setToken] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  // Récupération du token depuis l'URL dès le chargement de la page
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlToken = params.get("token");
+      if (urlToken) {
+        setToken(urlToken);
+      } else {
+        setError("Le jeton de réinitialisation est introuvable ou invalide.");
+      }
+    }
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setMessage("");
+
     const data = new FormData(e.currentTarget);
     const password = data.get('password');
     const confirmPassword = data.get('confirmPassword');
 
     if (password !== confirmPassword) {
-      alert("Les mots de passe ne correspondent pas !");
+      setError("Les mots de passe ne correspondent pas !");
       return;
     }
 
-    console.log("Nouveau mot de passe soumis");
-    
-    alert("Votre mot de passe a bien été réinitialisé !");
+    if (!token) {
+      setError("Jeton de réinitialisation manquant. Impossible de continuer.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Appel réel à ton backend (ajuste le port si nécessaire, ex: 5500)
+      const response = await fetch("http://localhost:5500/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password, token }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage("Votre mot de passe a bien été mis à jour ! Redirection...");
+        // Redirection automatique vers la page de connexion après 3 secondes
+        setTimeout(() => {
+          router.push("/connexion");
+        }, 3000);
+      } else {
+        setError(result.message || "Une erreur est survenue.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de contacter le serveur.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -70,18 +125,30 @@ export default function PasswordReset() {
             </div>
           </div>
 
+          {/* Messages de retour API */}
+          {message && (
+            <p className="text-sm text-green-400 text-center font-medium">
+              {message}
+            </p>
+          )}
+          {error && (
+            <p className="text-sm text-red-400 text-center font-medium">
+              {error}
+            </p>
+          )}
+
           <div>
             <button
               type="submit"
-              className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+              disabled={loading}
+              className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-50 transition-opacity"
             >
-              Update password
+              {loading ? "Updating..." : "Update password"}
             </button>
           </div>
         </form>
 
         <p className="mt-10 text-center text-sm/6 text-gray-400">
-          
           <Link href="/connexion" className="font-semibold text-indigo-400 hover:text-indigo-300">
             Back to sign in
           </Link>

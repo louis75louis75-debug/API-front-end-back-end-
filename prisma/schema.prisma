@@ -13,9 +13,13 @@ datasource db {
 model Review {
   id          Int      @id @default(autoincrement())
   name        String
-  date        DateTime
+  date        DateTime @default(now()) 
   rating      Int
-  description  String
+  description String
+
+  // lier l'avis à l'utilisateur :
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -24,4 +28,7 @@ model User {
   email       String   @unique
   password    String
   isAdmin     Boolean  @default(false)
+
+  // un utilisateur peut avoir plusieurs avis :
+  reviews     Review[]
 }
